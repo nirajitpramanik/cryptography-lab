@@ -68,3 +68,15 @@ if __name__ == "__main__":
     hash_value = generate_md5(message)
     print(f"Message: {message}")
     print(f"MD5 Hash: {hash_value}")
+
+# --------------------
+
+'''
+import hashlib
+
+text = "Secret Message"
+md5_hash = hashlib.md5(text.encode()).hexdigest()
+
+print("MD5 Hash:", md5_hash)
+
+'''

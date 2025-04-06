@@ -1,50 +1,62 @@
-def encrypt(plaintext, key):
-    """
-    Encrypts the plaintext using a columnar transposition cipher.
-    """
-    ciphertext = [""] * key
+def rail_fence_encrypt(text, rails):
+    rail = [[] for _ in range(rails)]
+    counter = 0
+    direction = 1  # 1 = down, -1 = up
 
-    # Loop through each column in the key
-    for column in range(key):
-        pointer = column
+    for char in text:
+        rail[counter].append(char)
 
-        # Append characters in the column to the ciphertext
-        while pointer < len(plaintext):
-            ciphertext[column] += plaintext[pointer]
-            pointer += key
+        if counter == 0:
+            direction = 1
+        elif counter == rails - 1:
+            direction = -1
 
-    return "".join(ciphertext)
+        counter += direction
 
-
-def decrypt(ciphertext, key):
-    """
-    Decrypts the ciphertext using a columnar transposition cipher.
-    """
-    # Calculate the number of rows and shaded boxes
-    num_rows = -(-len(ciphertext) // key) 
-    num_shaded_boxes = (num_rows * key) - len(ciphertext)
-
-    plaintext = [""] * num_rows
-    col = 0
-    row = 0
-
-    for symbol in ciphertext:
-        plaintext[row] += symbol
-        row += 1
-
-        if (row == num_rows) or (row == num_rows - 1 and col >= key - num_shaded_boxes):
-            row = 0
-            col += 1
-
-    return "".join(plaintext)
+    # Combine rails
+    return ''.join([''.join(r) for r in rail])
 
 
-if __name__ == "__main__":
-    plaintext = input("Enter the plaintext: ")
-    key = 8
+def rail_fence_decrypt(ciphertext, rails):
+    n = len(ciphertext)
+    rail = [['\n' for _ in range(n)] for _ in range(rails)]
+    # Mark the zigzag path
+    row, direction = 0, 1
+    for i in range(n):
+        rail[row][i] = '*'
+        if row == 0:
+            direction = 1
+        elif row == rails - 1:
+            direction = -1
+        row += direction
 
-    encrypted_text = encrypt(plaintext, key)
-    print(f"Encrypted Text: {encrypted_text}")
+    # Fill the ciphertext into the zigzag path
+    index = 0
+    for r in range(rails):
+        for c in range(n):
+            if rail[r][c] == '*' and index < n:
+                rail[r][c] = ciphertext[index]
+                index += 1
+    print(rail)
 
-    decrypted_text = decrypt(encrypted_text, key)
-    print(f"Decrypted Text: {decrypted_text}")
+    # Read the zigzag path to decrypt
+    result = ''
+    row, direction = 0, 1
+    for i in range(n):
+        result += rail[row][i]
+        if row == 0:
+            direction = 1
+        elif row == rails - 1:
+            direction = -1
+        row += direction
+
+    return result
+
+plaintext = "HELLOWORLD"
+rails = 3
+
+encrypted = rail_fence_encrypt(plaintext, rails)
+print("Encrypted:", encrypted)
+
+decrypted = rail_fence_decrypt(encrypted, rails)
+print("Decrypted:", decrypted)
